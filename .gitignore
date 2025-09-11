@@ -1,0 +1,15 @@
+# Ignore the builtin vscode files
+*.vscode
+
+# MacOS Files
+.DS_Store
+
+# Ignition content
+**/config/local
+**/config/resources/local
+
+**/conversion-report.txt
+**/.resources/
+
+# Secrets
+secrets/*

@@ -1,7 +1,22 @@
 ---
 services:
+  traefik:
+    image: traefik:v3.6
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.network=proxy"
+      - "--entrypoints.web.address=:80"
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
   gateway:
-    image: inductiveautomation/ignition:8.3.0-rc1
+    image: inductiveautomation/ignition:8.3.2-rc1
     volumes:
       - ./services/ignition/config:/usr/local/bin/ignition/data/config 
       - ./services/ignition/projects:/usr/local/bin/ignition/data/projects
@@ -27,7 +42,11 @@ services:
 
     labels:
       traefik.enable: "true"
-      traefik.hostname: "ignition83"
+      # Router: match the host and use the 'web' entrypoint
+      traefik.http.routers.ignition.rule: "Host(`ignition83.localtest.me`)"
+      traefik.http.routers.ignition.entrypoints: "web"
+      # Service: forward to the Ignition gateway internal port
+      traefik.http.services.ignition.loadbalancer.server.port: "8088"
     networks:
       - default
       - proxy
